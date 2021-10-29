@@ -221,11 +221,16 @@ func WaitTimeout(c *exec.Cmd, timeout time.Duration) error {
 	})
 
 	err := c.Wait()
+	// shutdown timer
+	timerFired := !timer.Stop()
+
+	// If err is nil, the process exited cleanly without being killed due to timeout
 	if err == nil {
 		return nil
 	}
 
-	if !timer.Stop() {
+	// return a timeout error instead of the process kill error due to timeout
+	if timerFired {
 		return TimeoutErr
 	}
 
